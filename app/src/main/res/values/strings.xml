@@ -43,4 +43,16 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="title_activity_edit_profile">EditProfileActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="prompt_email">Nombre de usuario (elige el que gustes)</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Iniciar Sesión</string>
+    <string name="action_sign_in_short">Iniciar Sesión</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="version">"alpha 0.0.5"</string>
+    <string name="news">"-arreglo video inicio&#10;&#10;-Los login son libres(puedes elegir el nombre de usuario que gustes, por ahora :O)&#10;&#10;-Chat general ahora es el Canal default(pronto te podras meter a tus propios grupos!, por ahora debes mensajear al admin para que te agregue a otro Canal)&#10;&#10;-Puedes cambiar tu foto de perfil en el menu de lapiz y tambien consultar tu nombre de usuario (pronto podras cambiarlo!)&#10;&#10;&#10;Bugs o sugerencias al DM (me van a valer verga y te voy a insultar)"</string>
 </resources>

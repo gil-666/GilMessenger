@@ -24,6 +24,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:title="GilMessenger"
             app:titleCentered="true"
+            app:navigationIconTint="@color/white"
             app:titleTextColor="@android:color/white"
             tools:ignore="MissingConstraints" />
     </com.google.android.material.appbar.AppBarLayout>
