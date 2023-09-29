@@ -63,7 +63,6 @@ class EditProfileActivity : AppCompatActivity() {
         binding.profileimgbutton.setOnClickListener {
             galleryLauncher.launch("image/*")
         }
-
         fetchUserImage(user) { imageUrl ->
             if (imageUrl != null) {
                 // Image URL fetched successfully, load it into ImageView
@@ -171,6 +170,7 @@ class EditProfileActivity : AppCompatActivity() {
                 // Handle error
                 onComplete(null)
                 println("the sex has not happened")
+                println("current user: ${fetchCurrentUser()}")
             }
         }
     }

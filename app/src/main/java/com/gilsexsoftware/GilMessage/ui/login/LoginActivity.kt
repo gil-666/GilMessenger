@@ -1,7 +1,9 @@
 package com.gilsexsoftware.GilMessage.ui.login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -24,11 +26,13 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityLoginBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
         val username = binding.username
         val password = binding.password
@@ -38,15 +42,50 @@ class LoginActivity : AppCompatActivity() {
         val videoPath = "android.resource://" + packageName + "/" + R.raw.splash
         val buttonVersion: Button = findViewById(R.id.button2)
 
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+        val savedUsername = sharedPreferences.getString("username", "")
+        binding.username.setText(savedUsername)
+
+        if (savedUsername != null) {
+            if(savedUsername.isNotEmpty()){
+                loading.visibility = View.VISIBLE
+
+                // Initialize loginViewModel
+                loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
+                    .get(LoginViewModel::class.java)
+
+                // Observe loginViewModel loginResult
+                loginViewModel.loginResult.observe(this@LoginActivity, Observer {
+                    val loginResult = it ?: return@Observer
+
+                    loading.visibility = View.GONE
+                    if (loginResult.error != null) {
+                        showLoginFailed(loginResult.error)
+                    }
+                    if (loginResult.success != null) {
+                        updateUiWithUser(loginResult.success)
+                    }
+                    setResult(Activity.RESULT_OK)
+
+                    //Complete and destroy login activity once successful
+                    finish()
+                })
+
+                // Call login
+                loginViewModel.login(savedUsername.toString(), "")
+            }
+        }
+
         buttonVersion.setOnClickListener {
             // Create and configure the alert dialog
             val alertDialogBuilder = AlertDialog.Builder(this)
             alertDialogBuilder.setTitle("Gracias <3")
-            alertDialogBuilder.setMessage("gracias por probar mi aplicacion, \ncon solo usarla ya me ayudas mucho a continuar el desarollo\nte debo una torta\n\n-gil \n\nVersion: ${getString(R.string.version)} \nFecha de compilación: 2023-9-28 3:10AM")  // You can replace this with the actual version
+            alertDialogBuilder.setMessage("gracias por probar mi aplicacion, \ncon solo usarla ya me ayudas mucho a continuar el desarollo\nte debo una torta\n\n-gil \n\nVersion: ${getString(R.string.version)} \nFecha de compilación: ${getString(R.string.compilationDate)}")  // You can replace this with the actual version
             alertDialogBuilder.create()
             alertDialogBuilder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             alertDialogBuilder.show()
         }
+
         videoView.run {
             setVideoURI(Uri.parse(videoPath))
             start()
@@ -127,11 +166,13 @@ class LoginActivity : AppCompatActivity() {
         val welcome = getString(R.string.welcome)
 //        val displayName = model.displayName
         val username = binding.username.text.toString()
+        sharedPreferences.edit().putString("username", username).apply()
         println("user is $username")
 
         val intent = Intent()
         intent.putExtra("username", username)
         setResult(Activity.RESULT_OK, intent)
+
         finish()
     }
 
@@ -154,6 +195,5 @@ fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
 }
-
 
 

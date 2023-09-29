@@ -46,12 +46,12 @@
         android:id="@+id/profileimgbutton"
         android:layout_width="251dp"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/textView5"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
         android:layout_marginStart="53dp"
         android:layout_marginEnd="56dp"
-        android:layout_marginBottom="227dp"
+        android:layout_marginBottom="68dp"
         android:text="Change profile picture" />
 
     <TextView
@@ -73,12 +73,12 @@
         android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/appBarLayout"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="68dp"
-        android:layout_marginTop="493dp"
-        android:layout_marginEnd="67dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="65dp"
+        android:layout_marginEnd="68dp"
+        android:layout_marginBottom="130dp"
         android:textAlignment="center"
         android:textSize="20sp"
         android:textStyle="bold" />

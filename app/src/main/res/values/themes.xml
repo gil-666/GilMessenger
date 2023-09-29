@@ -2,8 +2,15 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.GilMessage" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:actionOverflowButtonStyle">@style/OverflowButtonStyle</item>
+    </style>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Other style attributes -->
+
     </style>
 
+    <style name="OverflowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">#CDCDCD</item>
+    </style>
     <style name="Theme.GilMessage" parent="Base.Theme.GilMessage" />
 </resources>

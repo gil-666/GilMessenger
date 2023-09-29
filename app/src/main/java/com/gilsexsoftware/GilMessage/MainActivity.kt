@@ -1,7 +1,9 @@
 package com.gilsexsoftware.GilMessage
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -29,10 +31,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var chatClient: ChatClient // Declare chatClient
+    private lateinit var sharedPreferences: SharedPreferences
     val apiKey = "cdrk83rwm524"
 //    private lateinit var user: User
 
@@ -41,12 +45,18 @@ class MainActivity : AppCompatActivity() {
         private const val LOGIN_REQUEST = 124
     }
     var user = User(
+
         id = "",
         image = ""
 
     )
     override fun onCreate(savedInstanceState: Bundle?) {
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra("logout", false)) {
+            startLoginActivity()
+            return
+        }
         if (!isUserAuthenticated()) {
             startLoginActivity()
             println("no auth, user is ${user.id}")
@@ -141,11 +151,11 @@ class MainActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
     }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
         return when (item.itemId) {
             R.id.action_settings -> {
                 val intent2 = Intent(this, EditProfileActivity::class.java)
@@ -160,6 +170,20 @@ class MainActivity : AppCompatActivity() {
                 alertDialogBuilder.create()
                 alertDialogBuilder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                 alertDialogBuilder.show()
+                true
+            }
+            R.id.action_logout -> {
+                val alertDialogBuilder = AlertDialog.Builder(this)
+                alertDialogBuilder.setTitle("${getString(R.string.action_log_out)}")
+                alertDialogBuilder.setMessage("${getString(R.string.logout_confirmation)}")  // You can replace this with the actual version
+                alertDialogBuilder.create()
+                alertDialogBuilder.setPositiveButton("OK") { dialog, _ ->
+                    logOut()
+                    dialog.dismiss()
+                }
+                alertDialogBuilder.setNegativeButton("Cancelar") {dialog, _ -> dialog.dismiss()}
+                alertDialogBuilder.show()
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -216,7 +240,17 @@ class MainActivity : AppCompatActivity() {
         // For simplicity, assuming the user is authenticated if the user ID is not empty
         return !user.id.isNullOrEmpty()
     }
+    private fun logOut() {
+        // Clear the saved username
+        sharedPreferences.edit().remove("username").apply()
 
+        // Navigate back to LoginActivity
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra("logout", true)
+        startActivity(intent)
+        finish() // Close MainActivity
+    }
     private fun startLoginActivity() {
         val loginIntent = Intent(this, LoginActivity::class.java)
         loginIntent.putExtra("username", user.id)
@@ -283,3 +317,4 @@ class MainActivity : AppCompatActivity() {
             }
     }
 }
+
