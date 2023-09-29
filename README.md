@@ -1,13 +1,13 @@
 # GilMessenger
 
-# EN:
+## EN:
 Messaging app based on the Stream Chat API
 
 Personal project, not ready for production yet
 Requires Android 5.0 and up
 You can choose whatever username you want, for now (authentication will be added in the future)
 
-# ES:
+## ES:
 Aplicación de mensajeria basada en Stream Chat API
 
 Proyecto personal, no esta listo para producción todavia
