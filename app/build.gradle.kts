@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -55,6 +56,9 @@ dependencies {
     implementation ("androidx.activity:activity-ktx:1.5.1")
     implementation ("io.coil-kt:coil:2.2.1")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("io.getstream:stream-chat-android-pushprovider-firebase:5.16.0")
 //    implementation ("io.getstream:stream-chat-java:1.16.2")
 
 

@@ -1,5 +1,6 @@
 package com.gilsexsoftware.GilMessage
 
+//import io.getstream.chat.android.client.notifications.handler.NotificationConfig
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -21,9 +22,11 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.client.models.Filters
 import io.getstream.chat.android.client.models.User
+import io.getstream.chat.android.client.notifications.handler.NotificationConfig
 import io.getstream.chat.android.offline.model.message.attachments.UploadAttachmentsNetworkType
 import io.getstream.chat.android.offline.plugin.configuration.Config
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
+import io.getstream.chat.android.pushprovider.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.ui.channel.list.viewmodel.ChannelListViewModel
 import io.getstream.chat.android.ui.channel.list.viewmodel.bindView
 import io.getstream.chat.android.ui.channel.list.viewmodel.factory.ChannelListViewModelFactory
@@ -100,10 +103,13 @@ class MainActivity : AppCompatActivity() {
             ),
             appContext = applicationContext,
         )
-
+        val notificationConfig = NotificationConfig(
+            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "FB"))
+        )
         // Step 2 - Set up the client for API calls with the plugin for offline storage
         val client = ChatClient.Builder("$apiKey", applicationContext)
             .withPlugin(offlinePluginFactory)
+            .notifications(notificationConfig)
             .logLevel(ChatLogLevel.ALL) // Set to NOTHING in prod
             .build()
         Toast.makeText(getApplicationContext(), "Connecting to server 3...", Toast.LENGTH_SHORT)

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "571188337107",
+    "project_id": "gilmessenger-55449",
+    "storage_bucket": "gilmessenger-55449.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571188337107:android:fb3a630e061dd19cf77726",
+        "android_client_info": {
+          "package_name": "com.gilsexsoftware.GilMessage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi9THmXa0X8mfguAlSIKWqRAfOkvJIO94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
