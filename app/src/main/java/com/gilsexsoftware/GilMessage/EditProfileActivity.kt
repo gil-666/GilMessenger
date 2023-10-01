@@ -1,8 +1,12 @@
 package com.gilsexsoftware.GilMessage
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +16,8 @@ import com.bumptech.glide.Glide
 import com.gilsexsoftware.GilMessage.databinding.ActivityEditProfileBinding
 import com.google.android.material.snackbar.Snackbar
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryUsersRequest
+import io.getstream.chat.android.client.models.Filters
 import io.getstream.chat.android.client.models.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +33,7 @@ import java.net.URL
 class EditProfileActivity : AppCompatActivity() {
     private val PICK_IMAGE_REQUEST = 1
     private val IMGUR_CLIENT_ID = "96c7899f98191b5"
+    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var binding: ActivityEditProfileBinding
     private lateinit var user: User
     private val galleryLauncher =
@@ -40,6 +47,7 @@ class EditProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getStringExtra("passeduserId").toString()
+        sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         println("user is $userId")
         user = User(
             id = userId,
@@ -50,8 +58,18 @@ class EditProfileActivity : AppCompatActivity() {
         // Initialize the binding
         binding = ActivityEditProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val userLabel: TextView = findViewById(R.id.textView5)
-        userLabel.text = "Your username is: $userId"
+        val userLabel: TextView = findViewById(R.id.profileTextView)
+        val idLabel: TextView = findViewById(R.id.profileIDview)
+        idLabel.text = "@$userId"
+        fetchUserName(userId){userDisplayName ->
+            if (userDisplayName != null){
+                runOnUiThread{
+                    userLabel.text = userDisplayName
+                }
+            }else{
+                println("Could not obtain updated user display name")
+            }
+        }
         // Set up the toolbar
         setSupportActionBar(binding.toolbar)
         // Enable the Up button
@@ -63,7 +81,7 @@ class EditProfileActivity : AppCompatActivity() {
         binding.profileimgbutton.setOnClickListener {
             galleryLauncher.launch("image/*")
         }
-        fetchUserImage(user) { imageUrl ->
+        fetchUserImage(userId) { imageUrl ->
             if (imageUrl != null) {
                 // Image URL fetched successfully, load it into ImageView
                 runOnUiThread {
@@ -75,20 +93,63 @@ class EditProfileActivity : AppCompatActivity() {
                 println("Failed to fetch profile image")
             }
         }
+        userLabel.setOnClickListener {
+            // Create an AlertDialog to prompt the user for a string
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Nombre de pantalla")
+            builder.setMessage("Este es tu nombre que aparece en el chat, es diferente a tu nombre de usuario (el que usas para iniciar sesión)\n\nIngresa un nuevo nombre de pantalla:")
+
+            // Set up the input
+            val input = EditText(this)
+            builder.setView(input)
+
+            // Set up the OK button
+            builder.setPositiveButton("OK") { dialog, _ ->
+                val userName = input.text.toString()
+                // Call the updateUserID function with the provided userId
+
+                updateProfileName(userName)
+                userLabel.text =userName
+                dialog.dismiss()
+            }
+
+            // Set up the Cancel button
+            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+            builder.show()
+        }
+        idLabel.setOnClickListener {
+            // Create an AlertDialog to prompt the user for a string
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Nombre de usuario")
+            builder.setMessage("Este es tu ID unico para iniciar sesión, este valor no puede ser cambiado")
+            builder.setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            builder.show()
+        }
+
         // Set the image using Glide
 //        val imageView: ImageView = findViewById(R.id.imageView3)
 //        Glide.with(applicationContext).load(MainActivity().user.image).into(imageView)
     }
-    fun fetchCurrentUser(): User {
+    fun fetchCurrentUser(userID: String) {
         // Replace this with your actual logic to retrieve the current user
-        val userId = intent.getStringExtra("passeduserId").toString()
+        val client = ChatClient.instance()
 
-        // Assuming you have a User class, create and return a User object
-        return User(
-            id = userId,
-            name = "", // You can set the name based on your logic
-            image = "" // You can set the image based on your logic
+        val request = QueryUsersRequest(
+            filter = Filters.`in`("id", userID),
+            offset = 0,
+            limit = 3,
         )
+
+        client.queryUsers(request).enqueue { result ->
+            if (result.isSuccess) {
+                val user = result.data()
+                println("fetchcurrentuser result: $user")
+            } else {
+                println("could not fetch user data")
+            }
+        }
+
     }
     private fun updateProfileImage(newImage: String) {
         // Update the user's image URL
@@ -97,16 +158,58 @@ class EditProfileActivity : AppCompatActivity() {
         // Get the ChatClient instance
         val chatClient = ChatClient.instance()
 
-        // Call updateUser to update the user
-        val updatedUser = User(id = user.id, name = user.id, image = newImage)
-        chatClient.updateUser(updatedUser).enqueue { result ->
-            if (result.isSuccess) {
-                // Handle success
-                println("User image updated successfully")
-                currentFocus?.let { Snackbar.make(it, "Profile picture updated!", Snackbar.LENGTH_LONG) }
+        fetchUserName(user.id) { displayName ->
+            if (displayName != null) {
+                // Display name fetched successfully, update the user with the new image URL and display name
+                val updatedUser = User(id = user.id, name = displayName, image = newImage)
+                // Call updateUser to update the user
+                chatClient.updateUser(updatedUser).enqueue { result ->
+                    if (result.isSuccess) {
+                        // Handle success
+                        println("User image updated successfully")
+                        val rootView: View = findViewById(android.R.id.content)
+                        Snackbar.make(rootView, "Se actualizó la foto de perfil", Snackbar.LENGTH_LONG).show()
+                    } else {
+                        // Handle error
+                        println("Failed to update user image: ${result.error().message}")
+                    }
+                }
             } else {
-                // Handle error
-                println("Failed to update user image: ${result.error().message}")
+                // Handle the case where display name couldn't be fetched
+                println("Failed to fetch display name")
+            }
+        }
+
+    }
+
+    private fun updateProfileName(newID: String) {
+        // Update the user's image URL
+
+
+        // Get the ChatClient instance
+        val chatClient = ChatClient.instance()
+        user.name = newID
+        // Call updateUser to update the user
+        fetchUserImage(user.id) { imageUrl ->
+            if (imageUrl != null) {
+                // Image URL fetched successfully, update the user with the new display name and image URL
+                val updatedUser = User(id = user.id, name = newID, image = imageUrl)
+                // Call updateUser to update the user
+                chatClient.updateUser(updatedUser).enqueue { result ->
+                    println("API Response: $result") // Print the API response
+                    if (result.isSuccess) {
+                        // Handle success
+                        println("Display Name updated successfully")
+                        val rootView: View = findViewById(android.R.id.content)
+                        Snackbar.make(rootView, "Se actualizó el nombre de pantalla", Snackbar.LENGTH_LONG).show()
+                    } else {
+                        // Handle error
+                        println("Failed to update display name: ${result.error().message}")
+                    }
+                }
+            } else {
+                // Handle the case where image URL couldn't be fetched
+                println("Failed to fetch image URL")
             }
         }
 
@@ -152,28 +255,64 @@ class EditProfileActivity : AppCompatActivity() {
             null
         }
     }
-    private fun fetchUserImage(user: User, onComplete: (String?) -> Unit) {
+    private fun fetchUserImage(userID: String, onComplete: (String?) -> Unit) {
         val client = ChatClient.instance()
 
-        // Fetch the current user data
-        client.fetchCurrentUser().enqueue { result ->
-            if (result.isSuccess) {
-                val currentUser = result.data()
+        // Fetch the user data based on userID
+        val request = QueryUsersRequest(
+            filter = Filters.`in`("id", userID),
+            offset = 0,
+            limit = 1
+        )
 
-                // Get the image URL
-                val imageUrl = currentUser.image
-                println("the sex is: $imageUrl")
+        client.queryUsers(request).enqueue { result ->
+            if (result.isSuccess) {
+                val currentUser = result.data().firstOrNull()
+
+                // Check if a user was found and has an image
+                val imageUrl = currentUser?.image
+                println("User image URL: $imageUrl")
 
                 // Call the onComplete callback with the image URL
                 onComplete(imageUrl)
             } else {
                 // Handle error
                 onComplete(null)
-                println("the sex has not happened")
-                println("current user: ${fetchCurrentUser()}")
+                println("Error fetching user data: ${result.error()}")
             }
         }
     }
+
+    private fun fetchUserName(userID: String, onComplete: (String?) -> Unit) {
+        println("Fetching user display name for userID: $userID")
+        val client = ChatClient.instance()
+
+        // Fetch the user data based on userID
+        val request = QueryUsersRequest(
+            filter = Filters.`in`("id", userID),
+            offset = 0,
+            limit = 1
+        )
+
+        client.queryUsers(request).enqueue { result ->
+            println("API Response: $result") // Print the API response
+            if (result.isSuccess) {
+                val currentUser = result.data().firstOrNull()
+
+                // Check if a user was found and has an image
+                val displayName = currentUser?.name
+                println("User display name is: $displayName")
+
+                // Call the onComplete callback with the image URL
+                onComplete(displayName)
+            } else {
+                // Handle error
+                onComplete(null)
+                println("Error fetching user data: ${result.error()}")
+            }
+        }
+    }
+
     private fun uploadImageToImgur(imageData: ByteArray) {
         GlobalScope.launch(Dispatchers.IO) {
             val url = URL("https://api.imgur.com/3/image")

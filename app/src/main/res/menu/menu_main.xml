@@ -18,8 +18,8 @@
         android:title="@string/action_log_out" />
     <item
         android:id="@+id/action_settings"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Perfil"
         app:showAsAction="ifRoom" />
 </menu>

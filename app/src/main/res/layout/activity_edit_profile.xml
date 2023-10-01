@@ -22,65 +22,95 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:navigationIconTint="@color/white"
-            app:title="Settings"
+            app:title="Perfil"
             app:titleTextColor="@color/white"
             tools:ignore="MissingConstraints" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <ImageView
         android:id="@+id/imageView3"
-        android:layout_width="124dp"
-        android:layout_height="124dp"
+        android:layout_width="187dp"
+        android:layout_height="179dp"
         android:layout_above="@id/profileimgbutton"
+        android:layout_below="@+id/profileIDview"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="119dp"
-        android:layout_marginTop="185dp"
-        android:layout_marginEnd="117dp"
-        android:layout_marginBottom="48dp"
+        android:layout_marginStart="112dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/border"
         android:scaleType="fitXY"
         tools:srcCompat="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="184dp"
+        android:layout_height="22dp"
+        android:layout_below="@+id/appBarLayout"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="113dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginEnd="114dp"
+        android:layout_marginBottom="5dp"
+        android:text="(toca para +info)"
+        android:textAlignment="center"
+        android:textColor="#8A8A8A"
+        android:textSize="12sp" />
 
     <Button
         android:id="@+id/profileimgbutton"
         android:layout_width="251dp"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView5"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="53dp"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="68dp"
-        android:text="Change profile picture" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/appBarLayout"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="70dp"
-        android:layout_marginTop="57dp"
-        android:layout_marginEnd="65dp"
-        android:text="Current profile picture:"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginStart="54dp"
+        android:layout_marginEnd="55dp"
+        android:layout_marginBottom="225dp"
+        android:text="Cambiar foto de perfil" />
+
+    <TextView
+        android:id="@+id/profileTextView"
+        android:layout_width="278dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView4"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginStart="65dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="68dp"
-        android:layout_marginBottom="130dp"
+        android:clickable="true"
+        android:drawableStart="@drawable/stream_ui_ic_single_user"
+        android:drawableEnd="@drawable/stream_ui_ic_edit"
+        android:drawablePadding="-25sp"
+        android:text="cargando..."
         android:textAlignment="center"
         android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:background="@drawable/border"
+        app:drawableTint="#000000" />
+
+    <TextView
+        android:id="@+id/profileIDview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/profileTextView"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="66dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="67dp"
+        android:clickable="true"
+        android:drawableStart="@drawable/stream_ui_ic_pin"
+        android:drawablePadding="-25sp"
+        android:text="cargando..."
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="@drawable/border"
+        app:drawableTint="#000000" />
 
 </RelativeLayout>

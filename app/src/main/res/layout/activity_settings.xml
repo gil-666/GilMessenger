@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".SettingsActivity">
+
+  <com.google.android.material.appbar.AppBarLayout
+      android:id="@+id/appBarLayout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:fitsSystemWindows="true"
+
+      app:layout_constraintTop_toTopOf="parent">
+    <!-- Title Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#4527A0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:navigationIconTint="@color/white"
+        app:title="Ajustes"
+        app:titleTextColor="@color/white"
+        tools:ignore="MissingConstraints" />
+    <ListView
+        android:id="@+id/settingsListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+  </com.google.android.material.appbar.AppBarLayout>
+
+
+
+</RelativeLayout>

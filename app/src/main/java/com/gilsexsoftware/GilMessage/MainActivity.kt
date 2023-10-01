@@ -23,6 +23,7 @@ import io.getstream.chat.android.client.logger.ChatLogLevel
 import io.getstream.chat.android.client.models.Filters
 import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.client.notifications.handler.NotificationConfig
+import io.getstream.chat.android.client.notifications.handler.NotificationHandlerFactory
 import io.getstream.chat.android.offline.model.message.attachments.UploadAttachmentsNetworkType
 import io.getstream.chat.android.offline.plugin.configuration.Config
 import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             println("user is $username")
             setupChat()
         }
-
+        val channelId = intent.getStringExtra("channelId")
 
     }
 
@@ -107,9 +108,18 @@ class MainActivity : AppCompatActivity() {
             pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "FB"))
         )
         // Step 2 - Set up the client for API calls with the plugin for offline storage
+        val notificationHandler = NotificationHandlerFactory.createNotificationHandler(
+            context = applicationContext,
+            newMessageIntent = { messageId: String, channelType: String, channelId: String ->
+                // Create an Intent to open ChannelActivity and pass the channelId as an extra
+                val intent = ChannelActivity.newIntentFromNotification(this, "$channelType:$channelId", true)
+
+                intent
+            }
+        )
         val client = ChatClient.Builder("$apiKey", applicationContext)
             .withPlugin(offlinePluginFactory)
-            .notifications(notificationConfig)
+            .notifications(notificationConfig, notificationHandler)
             .logLevel(ChatLogLevel.ALL) // Set to NOTHING in prod
             .build()
         Toast.makeText(getApplicationContext(), "Connecting to server 3...", Toast.LENGTH_SHORT)
@@ -142,6 +152,8 @@ class MainActivity : AppCompatActivity() {
                     println("Error: $errorMessage")
                 }
             )
+
+
             val viewModelFactory = ChannelListViewModelFactory(filter, ChannelListViewModel.DEFAULT_SORT)
             val viewModel: ChannelListViewModel by viewModels { viewModelFactory }
             // Step 5 - Connect the ChannelListViewModel to the ChannelListView, loose
@@ -164,7 +176,7 @@ class MainActivity : AppCompatActivity() {
 
         return when (item.itemId) {
             R.id.action_settings -> {
-                val intent2 = Intent(this, EditProfileActivity::class.java)
+                val intent2 = Intent(this, SettingsActivity::class.java)
                 intent2.putExtra("passeduserId", user.id)
                 startActivityForResult(intent2, EDIT_PROFILE_REQUEST)
                 true

@@ -12,6 +12,7 @@ import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel.Mode.Norma
 import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel.Mode.Thread
 import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel.State.NavigateUp
 import com.gilsexsoftware.GilMessage.databinding.ActivityChannelBinding
+import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.models.Channel
 import io.getstream.chat.android.ui.message.input.viewmodel.bindView
 import io.getstream.chat.android.ui.message.list.header.viewmodel.MessageListHeaderViewModel
@@ -29,7 +30,8 @@ class ChannelActivity : AppCompatActivity() {
         // Step 0 - inflate binding
         binding = ActivityChannelBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        val fromNotification = intent.getBooleanExtra(FROM_NOTIFICATION_KEY, false)
+        val client = ChatClient.instance()
         val cid = checkNotNull(intent.getStringExtra(CID_KEY)) {
             "Specifying a channel id is required when starting ChannelActivity"
         }
@@ -74,18 +76,38 @@ class ChannelActivity : AppCompatActivity() {
 
         // Step 6 - Handle back button behaviour correctly when you're in a thread
         val backHandler = {
-            messageListViewModel.onEvent(MessageListViewModel.Event.BackButtonPressed)
+            if (fromNotification) {
+                // Coming from a notification, navigate to MainActivity
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()  // Finish the ChannelActivity
+            } else {
+                // Normal back behavior
+                messageListViewModel.onEvent(MessageListViewModel.Event.BackButtonPressed)
+            }
         }
+
         binding.messageListHeaderView.setBackButtonClickListener(backHandler)
         onBackPressedDispatcher.addCallback(this) {
+
             backHandler()
         }
     }
 
     companion object {
         private const val CID_KEY = "key:cid"
-
+        const val OPEN_CHANNEL_FROM_NOTIFICATION_ACTION = "com.gilsexsoftware.GilMessage.OPEN_CHANNEL_FROM_NOTIFICATION"
+        private const val FROM_NOTIFICATION_KEY = "from_notification"
         fun newIntent(context: Context, channel: Channel): Intent =
             Intent(context, ChannelActivity::class.java).putExtra(CID_KEY, channel.cid)
+        fun newIntentFromNotification(context: Context, channelId: String?, fromNotification: Boolean): Intent {
+            val intent = Intent(context, ChannelActivity::class.java)
+            intent.action = OPEN_CHANNEL_FROM_NOTIFICATION_ACTION
+            intent.putExtra(CID_KEY, channelId)
+            intent.putExtra(FROM_NOTIFICATION_KEY, fromNotification)
+            return intent
+        }
     }
+
+
 }
