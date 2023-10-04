@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -39,9 +41,22 @@ class LoginActivity : AppCompatActivity() {
         val login = binding.login
         val loading = binding.loading
         val videoView: VideoView = findViewById(R.id.videoView2)
+        val purpleBackground = findViewById<View>(R.id.purpleBackround)
         val videoPath = "android.resource://" + packageName + "/" + R.raw.splash
         val buttonVersion: Button = findViewById(R.id.button2)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+            // Hide VideoView
+            videoView.visibility = View.GONE
 
+            // Show purple background
+            purpleBackground.visibility = View.VISIBLE
+            purpleBackground.setBackgroundColor(Color.parseColor("#4527A0")) // Solid purple color
+        } else {
+            videoView.run {
+                setVideoURI(Uri.parse(videoPath))
+                start()
+            }
+        }
         sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
         val savedUsername = sharedPreferences.getString("username", "")
         binding.username.setText(savedUsername)
@@ -86,10 +101,6 @@ class LoginActivity : AppCompatActivity() {
             alertDialogBuilder.show()
         }
 
-        videoView.run {
-            setVideoURI(Uri.parse(videoPath))
-            start()
-        }
 
 
 //        videoView.setOnCompletionListener { mediaPlayer ->

@@ -19,21 +19,12 @@ import com.gilsexsoftware.GilMessage.databinding.ActivityMainBinding
 import com.gilsexsoftware.GilMessage.ui.login.LoginActivity
 import com.google.android.material.snackbar.Snackbar
 import io.getstream.chat.android.client.ChatClient
-import io.getstream.chat.android.client.logger.ChatLogLevel
+import io.getstream.chat.android.client.api.models.QueryUsersRequest
 import io.getstream.chat.android.client.models.Filters
 import io.getstream.chat.android.client.models.User
-import io.getstream.chat.android.client.notifications.handler.NotificationConfig
-import io.getstream.chat.android.client.notifications.handler.NotificationHandlerFactory
-import io.getstream.chat.android.offline.model.message.attachments.UploadAttachmentsNetworkType
-import io.getstream.chat.android.offline.plugin.configuration.Config
-import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
-import io.getstream.chat.android.pushprovider.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.ui.channel.list.viewmodel.ChannelListViewModel
 import io.getstream.chat.android.ui.channel.list.viewmodel.bindView
 import io.getstream.chat.android.ui.channel.list.viewmodel.factory.ChannelListViewModelFactory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -48,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         private const val EDIT_PROFILE_REQUEST = 123 // You can use any unique integer value
         private const val LOGIN_REQUEST = 124
     }
+
     var user = User(
 
         id = "",
@@ -68,12 +60,10 @@ class MainActivity : AppCompatActivity() {
             val username = intent.getStringExtra("username").toString()
 
             user.id = username
-
-
-
 //            updateUserName(username)
             println("user is $username")
             setupChat()
+
         }
         val channelId = intent.getStringExtra("channelId")
 
@@ -95,36 +85,10 @@ class MainActivity : AppCompatActivity() {
 //        setContentView(binding.root)
 
         // Step 1 - Set up the OfflinePlugin for offline storage
-        val offlinePluginFactory = StreamOfflinePluginFactory(
-            config = Config(
-                backgroundSyncEnabled = true,
-                userPresence = true,
-                persistenceEnabled = true,
-                uploadAttachmentsNetworkType = UploadAttachmentsNetworkType.NOT_ROAMING,
-            ),
-            appContext = applicationContext,
-        )
-        val notificationConfig = NotificationConfig(
-            pushDeviceGenerators = listOf(FirebasePushDeviceGenerator(providerName = "FB"))
-        )
-        // Step 2 - Set up the client for API calls with the plugin for offline storage
-        val notificationHandler = NotificationHandlerFactory.createNotificationHandler(
-            context = applicationContext,
-            newMessageIntent = { messageId: String, channelType: String, channelId: String ->
-                // Create an Intent to open ChannelActivity and pass the channelId as an extra
-                val intent = ChannelActivity.newIntentFromNotification(this, "$channelType:$channelId", true)
 
-                intent
-            }
-        )
-        val client = ChatClient.Builder("$apiKey", applicationContext)
-            .withPlugin(offlinePluginFactory)
-            .notifications(notificationConfig, notificationHandler)
-            .logLevel(ChatLogLevel.ALL) // Set to NOTHING in prod
-            .build()
         Toast.makeText(getApplicationContext(), "Connecting to server 3...", Toast.LENGTH_SHORT)
 
-
+        val client = ChatClient.instance()
         val token = client.devToken(user.id)
         client.connectUser(
             user = user,
@@ -161,6 +125,14 @@ class MainActivity : AppCompatActivity() {
             viewModel.bindView(binding.channelListView, this)
             binding.channelListView.setChannelItemClickListener { channel ->
                 startActivity(ChannelActivity.newIntent(this, channel))
+            }
+
+            fetchUserName(user.id) { userDisplayName ->
+                if (userDisplayName.isNullOrEmpty()) {
+                    println("obtained user display name is: $userDisplayName")
+                    NewUserRoutine(user.id)
+
+                }
             }
 
     }}
@@ -209,7 +181,6 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == LOGIN_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
                 // User has successfully logged in
@@ -219,7 +190,6 @@ class MainActivity : AppCompatActivity() {
                 // Handle the case where the username is not provided
                 if (!username.isNullOrEmpty()) {
                     user.id = username
-//                    updateUserName(username)
                     setupChat()
                 } else {
                     Toast.makeText(this, "Username not provided", Toast.LENGTH_SHORT).show()
@@ -275,46 +245,6 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(loginIntent, LOGIN_REQUEST)
     }
 
-    private fun updateUserName(newName: String) {
-        // Ensure the user is authenticated and you have a valid chatClient instance
-
-        // Construct the updated user object with the new name
-        val updatedUser = User(id = user.id, extraData = mutableMapOf("name" to newName))
-
-        // Call the updateUser function
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                // Use the chatClient to update the user
-                val updatedUserResponse = chatClient.updateUser(updatedUser).execute()
-                if (updatedUserResponse.isSuccess) {
-                    // Successfully updated user
-                    val updatedUser = updatedUserResponse.data()
-                    println("User name updated successfully to: ${updatedUser.name}")
-                } else {
-                    // Handle update failure
-                    println("Error updating user name: ${updatedUserResponse.error().message}")
-                }
-            } catch (e: Exception) {
-                // Handle any exceptions
-                println("Error updating user name: ${e.message}")
-            }
-        }
-    }
-    private fun fetchUserName(userId: String, onSuccess: (String) -> Unit, onError: (String) -> Unit) {
-        val client = ChatClient.instance()
-        client.fetchCurrentUser().enqueue { result ->
-            if (result.isSuccess) {
-                val user: User? = result.data()
-                val userName = user?.name ?: "Unknown" // Extract user's name (or use a default value)
-
-                // Call the success callback with the user's name
-                onSuccess(userName)
-            } else {
-                // Call the error callback with the error message
-                result.error().message?.let { onError(it) }
-            }
-        }
-    }
     fun addUserToChannel(channelId: String, userId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         // Assuming you have a ChatClient instance
         val chatClient = ChatClient.instance()
@@ -333,6 +263,53 @@ class MainActivity : AppCompatActivity() {
                     onError("Failed to add user to the channel: ${result.error().message}")
                 }
             }
+    }
+
+    fun NewUserRoutine (userId: String){
+        val builder = AlertDialog.Builder(this)
+
+        builder.setTitle("Hola!")
+        builder.setMessage("Parece que eres un usuario nuevo, por favor, configura tu perfil")
+        builder.setPositiveButton("Continuar"){dialog, _ ->
+            val intent2 = Intent(this, EditProfileActivity::class.java)
+            intent2.putExtra("passeduserId", userId)
+            startActivityForResult(intent2, SettingsActivity.EDIT_PROFILE_REQUEST)
+            dialog.dismiss()
+        }
+        builder.setCancelable(false)
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun fetchUserName(userID: String, onComplete: (String?) -> Unit) {
+        println("Fetching user display name for userID: $userID")
+        val client = ChatClient.instance()
+
+        val request = QueryUsersRequest(
+            filter = Filters.eq("id", userID),
+            offset = 0,
+            limit = 1
+        )
+
+        client.queryUsers(request).enqueue { result ->
+            if (result.isSuccess) {
+                val users = result.data()
+
+                if (users.isNotEmpty()) {
+                    val user = users.first()
+                    val displayName = user.name
+
+                    println("User display name is: $displayName")
+                    onComplete(displayName)
+                } else {
+                    println("No user found for the given ID: $userID")
+                    onComplete(null)
+                }
+            } else {
+                println("Error fetching user data: ${result.error()}")
+                onComplete(null)
+            }
+        }
     }
 }
 

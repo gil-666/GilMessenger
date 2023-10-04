@@ -202,6 +202,7 @@ class EditProfileActivity : AppCompatActivity() {
                         println("Display Name updated successfully")
                         val rootView: View = findViewById(android.R.id.content)
                         Snackbar.make(rootView, "Se actualizó el nombre de pantalla", Snackbar.LENGTH_LONG).show()
+
                     } else {
                         // Handle error
                         println("Failed to update display name: ${result.error().message}")

@@ -57,7 +57,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="logout_confirmation">"Tu información de inicio de sesión será eliminada y regresarás a la pantalla de inicio de sesión&#10;&#10;Continuar?"</string>
     <string name="login_failed">"Login failed"</string>
-    <string name="version">"alpha 0.0.10"</string>
-    <string name="compilationDate">"2023-10-1 1:00AM"</string>
-    <string name="news">"-Nuevo logo&#10;&#10;-Se mejoró la estabilidad de las notificaciones&#10;&#10;-Las notificaciones ahora mandan a su chat respectivo al ser presionadas&#10;&#10;-Ahora puedes tener un nombre en pantalla personalizado! (el nombre que se muestra en el chat, soporta emojis :D ) pruébalo en Ajustes->Perfil y toca la etiqueta de tu nombre!&#10;&#10;-Perfil: la imagen de usuario actual ahora se muestra correctamente&#10;&#10;-Ya puedes consultar tu nombre de usuario (login) en el menu Ajustes->Perfil&#10;&#10;Se agregó un menu de Ajustes general, para facilitar la adición de nuevas funciones&#10;&#10;&#10;Bugs o sugerencias al DM (me van a valer verga y te voy a insultar)"</string>
+    <string name="version">"alpha 0.0.11"</string>
+    <string name="compilationDate">"2023-10-1 6:00PM"</string>
+    <string name="news">"-Se agregó una alerta para usuarios nuevos&#10;&#10;&#10;Bugs o sugerencias al DM (me van a valer verga y te voy a insultar)"</string>
 </resources>

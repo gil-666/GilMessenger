@@ -12,7 +12,7 @@ import io.getstream.chat.android.client.models.User
 class SettingsActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     companion object {
-        private const val EDIT_PROFILE_REQUEST = 123 // You can use any unique integer value
+        const val EDIT_PROFILE_REQUEST = 123 // You can use any unique integer value
         private const val LOGIN_REQUEST = 124
     }
     var user = User(
