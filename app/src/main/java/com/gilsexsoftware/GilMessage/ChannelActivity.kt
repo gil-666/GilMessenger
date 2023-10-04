@@ -1,7 +1,9 @@
 package com.gilsexsoftware.GilMessage
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.viewModels
@@ -13,17 +15,32 @@ import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel.Mode.Threa
 import com.getstream.sdk.chat.viewmodel.messages.MessageListViewModel.State.NavigateUp
 import com.gilsexsoftware.GilMessage.databinding.ActivityChannelBinding
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryChannelsRequest
 import io.getstream.chat.android.client.models.Channel
+import io.getstream.chat.android.client.models.Filters
+import io.getstream.chat.android.client.models.User
+import io.getstream.chat.android.offline.model.message.attachments.UploadAttachmentsNetworkType
+import io.getstream.chat.android.offline.plugin.configuration.Config
+import io.getstream.chat.android.offline.plugin.factory.StreamOfflinePluginFactory
 import io.getstream.chat.android.ui.message.input.viewmodel.bindView
 import io.getstream.chat.android.ui.message.list.header.viewmodel.MessageListHeaderViewModel
 import io.getstream.chat.android.ui.message.list.header.viewmodel.bindView
 import io.getstream.chat.android.ui.message.list.viewmodel.bindView
 import io.getstream.chat.android.ui.message.list.viewmodel.factory.MessageListViewModelFactory
 
+
 class ChannelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChannelBinding
+    private lateinit var sharedPreferences: SharedPreferences
+    val apiKey = "cdrk83rwm524"
 
+    var user = User(
+
+        id = "",
+        image = ""
+
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -34,6 +51,39 @@ class ChannelActivity : AppCompatActivity() {
         val client = ChatClient.instance()
         val cid = checkNotNull(intent.getStringExtra(CID_KEY)) {
             "Specifying a channel id is required when starting ChannelActivity"
+        }
+
+        if (!ChatClient.instance().isSocketConnected() && fromNotification && !cid.isNullOrEmpty()) {
+            val apiKey = "$apiKey"
+            val offlinePluginFactory = StreamOfflinePluginFactory(
+                config = Config(
+                    backgroundSyncEnabled = true,
+                    userPresence = true,
+                    persistenceEnabled = true,
+                    uploadAttachmentsNetworkType = UploadAttachmentsNetworkType.NOT_ROAMING
+                ),
+                appContext = applicationContext
+            )
+            val chatClient = ChatClient.Builder(apiKey, applicationContext)
+                .withPlugin(offlinePluginFactory)
+                .build()
+
+            sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+            val savedUsername = sharedPreferences.getString("username", "").toString()
+            val user = User(id = savedUsername)  // Replace with the actual user ID
+            val token = client.devToken(savedUsername)  // Replace with the user's token (e.g., obtained from your backend)
+
+            chatClient.connectUser(user, token)
+                .enqueue { result ->
+                    if (result.isSuccess) {
+                        // Connection successful
+                        // Handle success cases
+                    } else {
+                        // Handle connection failure
+                        val errorMessage = result.error().message
+                        // Handle the error, e.g., display an error message
+                    }
+                }
         }
 
         // Step 1 - Create three separate ViewModels for the views so it's easy
@@ -109,5 +159,34 @@ class ChannelActivity : AppCompatActivity() {
         }
     }
 
+    private fun fetchChannelById(channelId: String, callback: (Channel?) -> Unit) {
+        println("Fetching channel with id: $channelId")
+        val client = ChatClient.instance()
+
+        val request = QueryChannelsRequest(
+            Filters.eq("cid", channelId),
+            offset = 0,
+            limit = 1
+        )
+
+        client.queryChannels(request).enqueue { result ->
+            if (result.isSuccess) {
+                val channels = result.data()
+
+                if (channels.isNotEmpty()) {
+                    val channel = channels[0]
+                    println(channel)
+                    callback(channel)
+
+                } else {
+                    println("No channel found for the given ID: $channelId")
+                    callback(null)
+                }
+            } else {
+                println("Error fetching user data: ${result.error()}")
+                callback(null)
+            }
+        }
+    }
 
 }

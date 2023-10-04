@@ -15,11 +15,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.ui.AppBarConfiguration
 import com.bumptech.glide.Glide
+import com.gilsexsoftware.GilMessage.MyFirebaseMessagingService.Companion.OPEN_CHANNEL_FROM_NOTIFICATION_ACTION
 import com.gilsexsoftware.GilMessage.databinding.ActivityMainBinding
 import com.gilsexsoftware.GilMessage.ui.login.LoginActivity
 import com.google.android.material.snackbar.Snackbar
 import io.getstream.chat.android.client.ChatClient
+import io.getstream.chat.android.client.api.models.QueryChannelsRequest
 import io.getstream.chat.android.client.api.models.QueryUsersRequest
+import io.getstream.chat.android.client.models.Channel
 import io.getstream.chat.android.client.models.Filters
 import io.getstream.chat.android.client.models.User
 import io.getstream.chat.android.ui.channel.list.viewmodel.ChannelListViewModel
@@ -38,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val EDIT_PROFILE_REQUEST = 123 // You can use any unique integer value
         private const val LOGIN_REQUEST = 124
+        private const val CID_KEY = "key:cid"
     }
 
     var user = User(
@@ -57,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             startLoginActivity()
             println("no auth, user is ${user.id}")
         } else {
+
             val username = intent.getStringExtra("username").toString()
 
             user.id = username
@@ -124,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             //          coupling makes it easy to customize
             viewModel.bindView(binding.channelListView, this)
             binding.channelListView.setChannelItemClickListener { channel ->
-                startActivity(ChannelActivity.newIntent(this, channel))
+                startActivity(MyFirebaseMessagingService.newIntent(this, channel))
             }
 
             fetchUserName(user.id) { userDisplayName ->
@@ -311,5 +316,53 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    private fun navigateToChannel(channelId: String?) {
+        if (channelId.isNullOrEmpty()) {
+            println("channelID is null or incorrect! $channelId")
+            return
+        }
+
+        // Assuming you have a function to fetch the Channel object based on channelId
+        fetchChannelById(channelId) { channel ->
+            if (channel != null) {
+                val intent = MyFirebaseMessagingService.newIntent(this, channel)
+                startActivity(intent)
+                finish()
+            } else {
+                // Handle the case where the channel is not found
+                Toast.makeText(applicationContext, "Channel not found", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    private fun fetchChannelById(channelId: String, callback: (Channel?) -> Unit) {
+        println("Fetching channel with id: $channelId")
+        val client = ChatClient.instance()
+
+        val request = QueryChannelsRequest(
+            Filters.eq("cid", channelId),
+            offset = 0,
+            limit = 1
+        )
+
+        client.queryChannels(request).enqueue { result ->
+            if (result.isSuccess) {
+                val channels = result.data()
+
+                if (channels.isNotEmpty()) {
+                    val channel = channels[0]
+                    println(channel)
+                    callback(channel)
+
+                } else {
+                    println("No channel found for the given ID: $channelId")
+                    callback(null)
+                }
+            } else {
+                println("Error fetching user data: ${result.error()}")
+                callback(null)
+            }
+        }
+    }
+
 }
 
