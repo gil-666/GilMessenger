@@ -33,7 +33,7 @@ class App : Application() {
             context = applicationContext,
             newMessageIntent = { messageId: String, channelType: String, channelId: String ->
                 // Create an Intent to open ChannelActivity and pass the channelId as an extra
-                val intent = ChannelActivity.newIntentFromNotification(this, "$channelType:$channelId", true)
+                val intent = MyFirebaseMessagingService.newIntentFromNotification(this, "$channelType:$channelId", true)
 
                 intent
             }
