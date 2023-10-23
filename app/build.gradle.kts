@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId = "com.gilsexsoftware.GilMessage"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 33
         versionCode = 1
-        versionName = "1.0"
+        versionName = "alpha-0.0.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -59,6 +59,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("io.getstream:stream-chat-android-pushprovider-firebase:5.16.0")
+    implementation("com.github.skydoves:colorpickerview:2.3.0")
 //    implementation ("io.getstream:stream-chat-java:1.16.2")
 
 

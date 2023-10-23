@@ -22,4 +22,10 @@
         android:orderInCategory="100"
         android:title="Perfil"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_flash"
+        android:icon="@drawable/ic_torch"
+        android:orderInCategory="100"
+        android:title="Linterna"
+        app:showAsAction="ifRoom" />
 </menu>

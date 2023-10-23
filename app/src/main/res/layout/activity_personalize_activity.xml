@@ -1,0 +1,69 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PersonalizeActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+
+        app:layout_constraintTop_toTopOf="parent">
+        <!-- Title Bar -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#4527A0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:navigationIconTint="@color/white"
+            app:title="Personalización"
+            app:titleTextColor="@color/white"
+            tools:ignore="MissingConstraints" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <Button
+        android:id="@+id/chatColorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="126dp"
+        android:layout_marginTop="219dp"
+        android:layout_marginEnd="127dp"
+        android:onClick="openChatColorPicker"
+        android:text="Cambiar fondo del chat" />
+
+    <Button
+        android:id="@+id/messageColorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/chatColorButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="112dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="112dp"
+        android:onClick="openMessageColorPicker"
+        android:text="Select Message Color (NO SIRVE)" />
+
+    <Button
+        android:id="@+id/fontColorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/messageColorButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="128dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="126dp"
+        android:onClick="openFontColorPicker"
+        android:text="Select Font Color (NO SIRVE)" />
+
+</RelativeLayout>

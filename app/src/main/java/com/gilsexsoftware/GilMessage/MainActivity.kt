@@ -5,6 +5,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -35,9 +38,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var chatClient: ChatClient // Declare chatClient
     private lateinit var sharedPreferences: SharedPreferences
+    private var isFlashlightOn = false
     val apiKey = "cdrk83rwm524"
 //    private lateinit var user: User
-
+    val client = ChatClient.instance()
     companion object {
         private const val EDIT_PROFILE_REQUEST = 123 // You can use any unique integer value
         private const val LOGIN_REQUEST = 124
@@ -93,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 
         Toast.makeText(getApplicationContext(), "Connecting to server 3...", Toast.LENGTH_SHORT)
 
-        val client = ChatClient.instance()
+
         val token = client.devToken(user.id)
         client.connectUser(
             user = user,
@@ -181,6 +185,27 @@ class MainActivity : AppCompatActivity() {
 
                 true
             }
+            R.id.action_flash -> {
+                val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                val cameraId = cameraManager.cameraIdList[0] // Use the first available camera
+
+                try {
+                    val isTorchOn = cameraManager.getCameraCharacteristics(cameraId)
+                        .get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+
+                    if (isTorchOn) {
+                        cameraManager.setTorchMode(cameraId, false) // Turn off the flashlight
+                        isFlashlightOn = false
+                    } else {
+                        cameraManager.setTorchMode(cameraId, true) // Turn on the flashlight
+                        isFlashlightOn = true
+                    }
+                } catch (e: CameraAccessException) {
+                    e.printStackTrace()
+                }
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -242,6 +267,8 @@ class MainActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("logout", true)
         startActivity(intent)
+
+        chatClient.disconnect(flushPersistence = true)
         finish() // Close MainActivity
     }
     private fun startLoginActivity() {

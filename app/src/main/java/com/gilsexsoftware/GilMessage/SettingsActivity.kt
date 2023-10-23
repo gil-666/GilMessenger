@@ -47,7 +47,10 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 // Add more cases for other settings and corresponding activities
-                1 -> { Snackbar.make(settingsListView, "Pronto :)", Snackbar.LENGTH_SHORT).show()
+                1 -> {
+                    val intent2 = Intent(this, PersonalizeActivity::class.java)
+                    intent2.putExtra("passeduserId", userId)
+                    startActivityForResult(intent2, EDIT_PROFILE_REQUEST)
                     true // Return true to indicate the event is handled }
             }
         }

@@ -1,10 +1,15 @@
 package com.gilsexsoftware.GilMessage
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.ColorSpace
+import android.graphics.ColorSpace.Rgb
 import android.os.Bundle
+import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +38,7 @@ class ChannelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChannelBinding
     private lateinit var sharedPreferences: SharedPreferences
+    private var messageListViewBackgroundColor: Int = DEFAULT_COLOR
     val apiKey = "cdrk83rwm524"
 
     var user = User(
@@ -44,6 +50,7 @@ class ChannelActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         // Step 0 - inflate binding
         binding = ActivityChannelBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -52,8 +59,16 @@ class ChannelActivity : AppCompatActivity() {
         val cid = checkNotNull(intent.getStringExtra(CID_KEY)) {
             "Specifying a channel id is required when starting ChannelActivity"
         }
+        val preferences = getSharedPreferences("ChatPreferences", Context.MODE_PRIVATE)
+        val backColor = preferences.getInt("background_color", DEFAULT_COLOR)
+        val selectedColor = preferences.getInt("bubble_color", DEFAULT_COLOR)
+        val messageListView = findViewById<io.getstream.chat.android.ui.message.list.MessageListView>(R.id.messageListView)
+
+        // Set the background color of the MessageListView
+        messageListView.setBackgroundColor(backColor)
 
         if (!ChatClient.instance().isSocketConnected() && fromNotification && !cid.isNullOrEmpty()) {
+            println("fromNotification has been triggered, user is ${user.id}")
             val apiKey = "$apiKey"
             val offlinePluginFactory = StreamOfflinePluginFactory(
                 config = Config(
@@ -144,10 +159,12 @@ class ChannelActivity : AppCompatActivity() {
         }
     }
 
+
     companion object {
-        private const val CID_KEY = "key:cid"
+        const val CID_KEY = "key:cid"
         const val OPEN_CHANNEL_FROM_NOTIFICATION_ACTION = "com.gilsexsoftware.GilMessage.OPEN_CHANNEL_FROM_NOTIFICATION"
         private const val FROM_NOTIFICATION_KEY = "from_notification"
+        private const val DEFAULT_COLOR = Color.GREEN
         fun newIntent(context: Context, channel: Channel): Intent =
             Intent(context, ChannelActivity::class.java).putExtra(CID_KEY, channel.cid)
         fun newIntentFromNotification(context: Context, channelId: String?, fromNotification: Boolean): Intent {
