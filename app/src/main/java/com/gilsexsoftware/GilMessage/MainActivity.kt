@@ -268,7 +268,7 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("logout", true)
         startActivity(intent)
 
-        chatClient.disconnect(flushPersistence = true)
+        client.disconnect(flushPersistence = true)
         finish() // Close MainActivity
     }
     private fun startLoginActivity() {
